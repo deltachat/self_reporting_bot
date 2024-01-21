@@ -1,4 +1,5 @@
 import os.path
+from pathlib import Path
 import simplebot
 
 @simplebot.filter
@@ -16,7 +17,8 @@ def process(bot, message, replies):
             parts = l.split()
             statistics[parts[0]] = parts[1]
 
-        filename = statistics["self_reporting_id"]
+        Path("reports").mkdir(exist_ok=True)
+        filename = os.path.join("reports", statistics["self_reporting_id"])
         version = 1
         while os.path.exists(filename + "." + str(version)):
             version += 1
