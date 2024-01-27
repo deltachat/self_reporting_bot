@@ -1,13 +1,25 @@
+import logging
 import os.path
 from pathlib import Path
-import simplebot
 
-@simplebot.filter
-def process(bot, message, replies):
-    """Echoes back received message."""
+from deltabot_cli import BotCli, events
+
+cli = BotCli("telemetrybot")
+
+
+@cli.on(events.RawEvent)
+def log_event(event):
+    logging.info(event)
+
+
+@cli.on(events.NewMessage)
+def on_new_message(event):
     try:
-        text = message.text
-        bot.account.delete_messages([message])
+        rpc = event.rpc
+        accid = event.accid
+        chatid = event.msg.chat_id
+        text = event.msg.text
+        rpc.delete_messages(accid, [event.msg.id])
 
         if not text.startswith("core_version "):
             raise ValueError("Message doesn't start with core_version")
@@ -33,8 +45,23 @@ def process(bot, message, replies):
         with open(filename, "w") as file:
             file.write(text)
 
-        replies.add(text="Thanks for sending statistics about your usage of Delta Chat to us! We will use it to get a feeling of how people use Delta Chat, and to improve often-occuring issues.")
-    except Exception as e:
-        print("Could not parse self_reporting message:", e)
-        replies.add(text="Sorry, I couldn't understand your message.\n\nI am a bot for receiving statistics about your usage of Delta Chat. All other messages will be ignored.")
-        
+        rpc.misc_send_text_message(
+            accid,
+            chatid,
+            "Thanks for sending statistics about your usage of Delta Chat to us! We will use it to get a feeling of how people use Delta Chat, and to improve often-occuring issues.",
+        )
+    except Exception:
+        logging.exception("Could not parse self_reporting message")
+        rpc.misc_send_text_message(
+            accid,
+            chatid,
+            "Sorry, I couldn't understand your message.\n\nI am a bot for receiving statistics about your usage of Delta Chat. All other messages will be ignored.",
+        )
+
+
+def main():
+    cli.start()
+
+
+if __name__ == "__main__":
+    main()
