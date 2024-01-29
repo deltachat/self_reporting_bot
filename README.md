@@ -15,13 +15,13 @@ pip install git+https://github.com/deltachat/self_reporting_bot.git
 Configure the bot:
 
 ```sh
-telemetrybot init bot@example.com PASSWORD
+self_reporting_bot init bot@example.com PASSWORD
 ```
 
 Start the bot:
 
 ```sh
-telemetrybot serve
+self_reporting_bot serve
 ```
 
-Run `telemetrybot --help` to see all available options.
+Run `self_reporting_bot --help` to see all available options.

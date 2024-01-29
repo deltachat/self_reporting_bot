@@ -32,7 +32,7 @@ dev = [
 ]
 
 [project.scripts]
-telemetrybot = "self_reporting_bot:main"
+self_reporting_bot = "self_reporting_bot:main"
 
 [tool.black]
 line-length = 120

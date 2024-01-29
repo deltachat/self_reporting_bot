@@ -4,7 +4,7 @@ from pathlib import Path
 
 from deltabot_cli import BotCli, events
 
-cli = BotCli("telemetrybot")
+cli = BotCli("self_reporting_bot")
 
 
 @cli.on(events.RawEvent)
