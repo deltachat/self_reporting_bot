@@ -2,24 +2,33 @@ import logging
 import os.path
 from pathlib import Path
 
-from deltabot_cli import BotCli, events
+from deltabot_cli import BotCli, EventType, events
+from rich.logging import RichHandler
 
 cli = BotCli("self_reporting_bot")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(message)s",
+    handlers=[RichHandler(show_time=False, show_path=False)],
+)
 
 
 @cli.on(events.RawEvent)
-def log_event(event):
-    logging.info(event)
+def log_event(bot, accid, event):
+    if event.kind == EventType.INFO:
+        bot.logger.info(event.msg)
+    elif event.kind == EventType.WARNING:
+        bot.logger.warning(event.msg)
+    elif event.kind == EventType.ERROR:
+        bot.logger.error(event.msg)
 
 
 @cli.on(events.NewMessage)
-def on_new_message(event):
+def on_new_message(bot, accid, event):
+    chatid = event.msg.chat_id
     try:
-        rpc = event.rpc
-        accid = event.accid
-        chatid = event.msg.chat_id
         text = event.msg.text
-        rpc.delete_messages(accid, [event.msg.id])
+        bot.rpc.delete_messages(accid, [event.msg.id])
 
         if not text.startswith("core_version "):
             raise ValueError("Message doesn't start with core_version")
@@ -45,14 +54,14 @@ def on_new_message(event):
         with open(filename, "w") as file:
             file.write(text)
 
-        rpc.misc_send_text_message(
+        bot.rpc.misc_send_text_message(
             accid,
             chatid,
             "Thanks for sending statistics about your usage of Delta Chat to us! We will use it to get a feeling of how people use Delta Chat, and to improve often-occuring issues.",
         )
     except Exception:
-        logging.exception("Could not parse self_reporting message")
-        rpc.misc_send_text_message(
+        bot.logger.exception("Could not parse self_reporting message")
+        bot.rpc.misc_send_text_message(
             accid,
             chatid,
             "Sorry, I couldn't understand your message.\n\nI am a bot for receiving statistics about your usage of Delta Chat. All other messages will be ignored.",

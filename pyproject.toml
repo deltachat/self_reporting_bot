@@ -18,7 +18,7 @@ dynamic = [
     "version"
 ]
 dependencies = [
-    "deltabot-cli @ git+https://github.com/deltachat-bot/deltabot-cli-py.git#master",
+    "deltabot-cli>=2.0.0,<3.0",
 ]
 
 [project.optional-dependencies]
