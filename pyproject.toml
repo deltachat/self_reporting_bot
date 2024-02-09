@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
+requires = ["setuptools>=64", "setuptools_scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -14,11 +14,9 @@ classifiers = [
   "Programming Language :: Python :: 3",
   "Intended Audience :: Developers",
 ]
-dynamic = [
-    "version"
-]
+dynamic = ["version"]
 dependencies = [
-    "deltabot-cli>=2.0.0,<3.0",
+    "deltabot-cli>=3.0.0,<4.0",
 ]
 
 [project.optional-dependencies]
@@ -33,6 +31,9 @@ dev = [
 
 [project.scripts]
 self_reporting_bot = "self_reporting_bot:main"
+
+[tool.setuptools_scm]
+# can be empty if no extra settings are needed, presence enables setuptools_scm
 
 [tool.black]
 line-length = 120
