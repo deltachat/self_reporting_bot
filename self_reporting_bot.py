@@ -41,7 +41,7 @@ def on_new_message(bot, accid, event):
         self_reporting_id = statistics["self_reporting_id"]
         if any(c not in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_" for c in self_reporting_id):
             raise ValueError("Invalid self_reporting_id")
-        if len(self_reporting_id) != 11:
+        if len(self_reporting_id) < 11 or len(self_reporting_id) > 32:
             raise ValueError("self_reporting_id has the wrong length")
 
         Path("reports").mkdir(exist_ok=True)
