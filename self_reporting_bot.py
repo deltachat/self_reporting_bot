@@ -2,7 +2,8 @@ import logging
 import os.path
 from pathlib import Path
 
-from deltabot_cli import BotCli, EventType, events
+from deltabot_cli import BotCli
+from deltachat2 import EventType, events
 from rich.logging import RichHandler
 
 cli = BotCli("self_reporting_bot")
