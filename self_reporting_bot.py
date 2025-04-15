@@ -57,7 +57,7 @@ def on_new_message(bot, accid, event):
         bot.rpc.misc_send_text_message(
             accid,
             chatid,
-            "Thanks for sending statistics about your usage of Delta Chat to us! We will use it to get a feeling of how people use Delta Chat, and to improve often-occuring issues.",
+            "Thanks for sending statistics about your usage of Delta Chat to us! We will use it to improve the security of Delta Chat.",
         )
     except Exception:
         bot.logger.exception("Could not parse self_reporting message")
@@ -67,6 +67,7 @@ def on_new_message(bot, accid, event):
             "Sorry, I couldn't understand your message.\n\nI am a bot for receiving statistics about your usage of Delta Chat. All other messages will be ignored.",
         )
 
+# TODO: On message delivered, delete chat & contact
 
 def main():
     cli.start()
