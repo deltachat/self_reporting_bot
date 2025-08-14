@@ -35,14 +35,14 @@ def on_new_message(bot, accid, event):
         with open(msg.file) as file:
             new_data = json.load(file)
 
-        self_reporting_id = new_data["self_reporting_id"]
-        if any(c not in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_" for c in self_reporting_id):
-            raise ValueError("Invalid self_reporting_id")
-        if len(self_reporting_id) < 11 or len(self_reporting_id) > 32:
-            raise ValueError("self_reporting_id has the wrong length")
+        statistics_id = new_data["statistics_id"]
+        if any(c not in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_" for c in statistics_id):
+            raise ValueError("Invalid statistics_id")
+        if len(statistics_id) < 11 or len(statistics_id) > 32:
+            raise ValueError("statistics_id has the wrong length")
 
         Path("reports").mkdir(exist_ok=True)
-        filename = os.path.join("reports", self_reporting_id)
+        filename = os.path.join("reports", statistics_id)
 
         if os.path.exists(filename):
             with open(filename) as file:
