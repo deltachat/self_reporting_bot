@@ -1,6 +1,7 @@
 import logging
 import os.path
 from pathlib import Path
+import time
 import json
 
 from deltabot_cli import BotCli
@@ -43,6 +44,8 @@ def on_new_message(bot, accid, event):
 
         Path("reports").mkdir(exist_ok=True)
         filename = os.path.join("reports", statistics_id)
+
+        new_data["timestamp_received_by_bot"] = int(time.time())
 
         if os.path.exists(filename):
             with open(filename) as file:
