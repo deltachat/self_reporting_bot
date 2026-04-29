@@ -64,6 +64,8 @@ def on_new_message(bot, accid, event):
             msg.id,
             ["❤️"],
         )
+
+        cleanup_after_message(bot, accid, msg.chat_id)
     except Exception:
         bot.logger.exception("Could not parse self_reporting message")
         bot.rpc.misc_send_text_message(
@@ -71,15 +73,16 @@ def on_new_message(bot, accid, event):
             chatid,
             "Sorry, I couldn't understand your message.\n\nI am a bot for receiving statistics about your usage of Delta Chat. All other messages will be ignored.",
         )
+        cleanup_after_message(bot, accid, msg.chat_id)
 
 
-def cleanup_after_message(bot, accid, msg):
-    contact_ids = bot.rpc.get_chat_contacts(accid, msg.chat_id)
+def cleanup_after_message(bot, accid, chat_id):
+    contact_ids = bot.rpc.get_chat_contacts(accid, chat_id)
 
     # First delete the chat,
     # because contacts that are still in a chat can't be deleted
-    bot.rpc.delete_chat(accid, msg.chat_id)
-    bot.logger.info(f"Cleaned up chat {msg.chat_id}.")
+    bot.rpc.delete_chat(accid, chat_id)
+    bot.logger.info(f"Cleaned up chat {chat_id}.")
 
     for contact_id in contact_ids:
         if contact_id <= SpecialContactId.LAST_SPECIAL:
@@ -99,18 +102,8 @@ def log_event(bot, accid, event):
         bot.logger.warning(event.msg)
     elif event.kind == EventType.ERROR:
         bot.logger.error(event.msg)
-    elif event.kind == EventType.MSG_DELIVERED:
-        cleanup_after_message(bot, accid, bot.rpc.get_message(accid, event.msg_id))
     else:
         bot.logger.info(f"Event: {event}")
-
-
-def main():
-    cli.start()
-
-
-if __name__ == "__main__":
-    main()
 
 
 @cli.on_init
@@ -120,3 +113,19 @@ def on_init(bot, args):
         bot.logger.info("Using settings: %s", bot.rpc.get_info(accid))
         bot.rpc.set_config(accid, "delete_server_after", "1")
         bot.rpc.set_config(accid, "delete_device_after", "3600")
+
+
+@cli.on_start
+def on_start(bot, args):
+    bot.logger.info("Deleting all chats")
+    for accid in bot.rpc.get_all_account_ids():
+        for chat_id in bot.rpc.get_chatlist_entries(accid, None, None, None):
+            cleanup_after_message(bot, accid, chat_id)
+
+
+def main():
+    cli.start()
+
+
+if __name__ == "__main__":
+    main()

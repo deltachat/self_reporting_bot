@@ -16,7 +16,7 @@ classifiers = [
 ]
 dynamic = ["version"]
 dependencies = [
-    "deltabot-cli>=6.0.0,<7.0",
+    "deltabot-cli>=8.0.0,<9.0",
 ]
 
 [project.optional-dependencies]
