@@ -115,14 +115,6 @@ def on_init(bot, args):
         bot.rpc.set_config(accid, "delete_device_after", "3600")
 
 
-@cli.on_start
-def on_start(bot, args):
-    bot.logger.info("Deleting all chats")
-    for accid in bot.rpc.get_all_account_ids():
-        for chat_id in bot.rpc.get_chatlist_entries(accid, None, None, None):
-            cleanup_after_message(bot, accid, chat_id)
-
-
 def main():
     cli.start()
 
