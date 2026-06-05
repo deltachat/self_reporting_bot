@@ -67,7 +67,7 @@ def on_new_message(bot, accid, event):
             ["❤️"],
         )
 
-    except Exception as e:
+    except Exception:
         bot.logger.exception("Could not parse self_reporting message")
         bot.rpc.misc_send_text_message(
             accid,
