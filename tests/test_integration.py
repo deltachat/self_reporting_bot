@@ -5,7 +5,7 @@ import pytest
 from pathlib import Path
 
 
-def wait_for(condition, timeout=15, interval=0.3, msg="condition never met"):
+def wait_for(condition, timeout=5, interval=0.3, msg="condition never met"):
     """Poll until condition() is truthy or timeout."""
     deadline = time.time() + timeout
     while time.time() < deadline:
@@ -26,10 +26,10 @@ def send_statistics(rpc, accid, chat_id, stats_data, tmp_path, filename="statist
 class TestBotIntegration:
 
     def test_valid_report_gets_reaction_not_text(
-        self, user_rpc, user_accid, established_chat, reports_dir, tmp_path
+        self, user_rpc, user_accid, chat_id_with_bot, reports_dir, tmp_path
     ):
         stats = {"stats_id": "validId_test001", "metric": 1}
-        chat_id = send_statistics(user_rpc, user_accid, established_chat, stats, tmp_path)
+        chat_id = send_statistics(user_rpc, user_accid, chat_id_with_bot, stats, tmp_path)
 
         def got_reaction():
             msgs = user_rpc.get_messages(user_accid, chat_id)
@@ -47,11 +47,11 @@ class TestBotIntegration:
         assert bot_text_replies == [], "Bot should react, not reply with text"
 
     def test_valid_report_is_saved_to_disk(
-        self, established_chat, user_rpc, user_accid, reports_dir, tmp_path
+        self, chat_id_with_bot, user_rpc, user_accid, reports_dir, tmp_path
     ):
         stats_id = "savedToDisk001"
         stats = {"stats_id": stats_id, "some_metric": 99}
-        send_statistics(user_rpc, user_accid, established_chat, stats, tmp_path)
+        send_statistics(user_rpc, user_accid, chat_id_with_bot, stats, tmp_path)
 
         def report_exists():
             p = reports_dir / stats_id
@@ -64,29 +64,34 @@ class TestBotIntegration:
         assert saved[0]["some_metric"] == 99
         assert "timestamp_received_by_bot" in saved[0]
 
-    def test_cleanup_happens_after_reaction_is_delivered(
-        self, bot_rpc, bot_accid, user_rpc, user_accid, established_chat, reports_dir, tmp_path
+    def test_cleanup(
+        self, bot_rpc, bot_accid, user_rpc, user_accid, chat_id_with_bot, reports_dir, tmp_path
     ):
         stats = {"stats_id": "cleanupOrder001", "x": 1}
-        send_statistics(user_rpc, user_accid, established_chat, stats, tmp_path)
+        send_statistics(user_rpc, user_accid, chat_id_with_bot, stats, tmp_path)
 
         def got_reaction():
-            msg_ids = user_rpc.get_message_ids(user_accid, established_chat, False, False)
+            msg_ids = user_rpc.get_message_ids(user_accid, chat_id_with_bot, False, False)
             return any(user_rpc.get_message_reactions(user_accid, m) for m in msg_ids)
 
         wait_for(got_reaction, msg="Reaction never delivered to user — cleanup may have fired too early")
 
-        def bot_chat_gone():
-            chat_ids = bot_rpc.get_chatlist_entries(bot_accid, None, None, None)
-            return established_chat not in chat_ids
+        # Check that the bot properly cleaned up the chat:
 
-        wait_for(bot_chat_gone, msg="Bot never cleaned up the chat")
+        chat_ids = bot_rpc.get_chatlist_entries(bot_accid, None, None, None)
+        assert len(chat_ids) == 2
+        for chat_id in chat_ids:
+            chat_snapshot = bot_rpc.get_basic_chat_info(bot_accid, chat_id)
+            assert chat_snapshot.name == "Saved messages" or chat_snapshot.name == "Device messages"
+
+        contacts = bot_rpc.get_contacts(bot_accid, 0, None)
+        assert not contacts
 
     # def test_invalid_stats_id_sends_error_message(
-    #     self, established_chat, user_rpc, user_accid, reports_dir, tmp_path
+    #     self, chat_id_with_bot, user_rpc, user_accid, reports_dir, tmp_path
     # ):
     #     stats = {"stats_id": "bad id!!!"}  # spaces and ! are invalid
-    #     chat_id = send_statistics(user_rpc, user_accid, established_chat, stats, tmp_path)
+    #     chat_id = send_statistics(user_rpc, user_accid, chat_id_with_bot, stats, tmp_path)
 
     #     def got_error_reply():
     #         msgs = user_rpc.get_messages(user_accid, chat_id)

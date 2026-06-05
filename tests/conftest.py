@@ -31,17 +31,7 @@ def wait_for_event(rpc, kind, predicate=lambda e: True, timeout=30):
 
 def exchange_contacts(inviter_rpc, inviter_accid, joiner_rpc, joiner_accid) -> int:
     """Perform a securejoin handshake so both sides have each other's pubkey."""
-    qr = inviter_rpc.get_chat_securejoin_qr_code(inviter_accid, None)
 
-    chat_id = joiner_rpc.secure_join(joiner_accid, qr)
-
-    wait_for_event(
-        joiner_rpc,
-        EventType.SECUREJOIN_JOINER_PROGRESS,
-        predicate=lambda e: e.progress == 1000,
-    )
-
-    return chat_id
 
 
 def get_bot_chat_id_for_incoming(bot_rpc, timeout=30):
@@ -105,7 +95,17 @@ def running_bot(bot_rpc, bot_accid, reports_dir):
 
 
 @pytest.fixture(scope="session")
-def established_chat(bot_rpc, bot_accid, user_rpc, user_accid):
+def chat_id_with_bot(bot_rpc, bot_accid, user_rpc, user_accid):
     """A chat between user and bot with keys already exchanged."""
-    chat_id = exchange_contacts(bot_rpc, bot_accid, user_rpc, user_accid)
+
+    qr = bot_rpc.get_chat_securejoin_qr_code(bot_accid, None)
+
+    chat_id = user_rpc.secure_join(user_accid, qr)
+
+    wait_for_event(
+        user_rpc,
+        EventType.SECUREJOIN_JOINER_PROGRESS,
+        predicate=lambda e: e.progress == 1000,
+    )
+
     return chat_id
