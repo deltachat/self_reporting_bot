@@ -29,21 +29,6 @@ def wait_for_event(rpc, kind, predicate=lambda e: True, timeout=30):
     raise TimeoutError(f"Timed out waiting for event {kind}")
 
 
-def exchange_contacts(inviter_rpc, inviter_accid, joiner_rpc, joiner_accid) -> int:
-    """Perform a securejoin handshake so both sides have each other's pubkey."""
-
-
-
-def get_bot_chat_id_for_incoming(bot_rpc, timeout=30):
-    """Wait for the next INCOMING_MSG event on the bot and return its chat_id."""
-    deadline = time.time() + timeout
-    while time.time() < deadline:
-        event = bot_rpc.get_next_event()
-        if event.event.kind == EventType.INCOMING_MSG:
-            return event.event.chat_id
-    raise TimeoutError("Bot never received an incoming message")
-
-
 @pytest.fixture(scope="session")
 def bot_rpc(tmp_path_factory):
     accounts_dir = tmp_path_factory.mktemp("bot_accounts")
