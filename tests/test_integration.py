@@ -1,3 +1,5 @@
+# Run with `pytest tests` (you need to `pip install pytest` in a virtualenv before)
+
 import json
 import time
 import pytest
