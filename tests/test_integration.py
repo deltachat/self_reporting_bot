@@ -1,4 +1,3 @@
-# tests/test_integration.py
 import json
 import time
 import pytest
@@ -28,17 +27,14 @@ def assert_bot_cleaned_up(bot_rpc, bot_accid):
     assert len(chat_ids) == 0
 
     contacts = bot_rpc.get_contacts(bot_accid, 0, None)
-    assert not contacts
-    print("dbg end 3")
+    assert len(contacts) == 0
 
 
 def test_valid_report_gets_reaction(
     user_rpc, user_accid, bot_rpc, bot_accid, chat_id_with_bot, reports_dir, tmp_path
 ):
-    print("dbg start 1")
     stats = {"stats_id": "test_reaction_id", "metric": 1}
     sent_stats_msg_id = send_statistics(user_rpc, user_accid, chat_id_with_bot, stats, tmp_path)
-    print("dbg stats_msg_id", sent_stats_msg_id)
 
     def got_reaction():
         reactions = user_rpc.get_message_reactions(user_accid, sent_stats_msg_id)
@@ -48,13 +44,10 @@ def test_valid_report_gets_reaction(
 
     assert_bot_cleaned_up(bot_rpc, bot_accid)
 
-    print("dbg end 1")
-
 
 def test_valid_report_is_saved_to_disk(
     chat_id_with_bot, user_rpc, bot_rpc, bot_accid, user_accid, reports_dir, tmp_path
 ):
-    print("dbg start 2")
     stats_id = "test_saved_to_disk_id"
     stats = {"stats_id": stats_id, "some_metric": 99}
     send_statistics(user_rpc, user_accid, chat_id_with_bot, stats, tmp_path)
@@ -72,23 +65,16 @@ def test_valid_report_is_saved_to_disk(
 
     assert_bot_cleaned_up(bot_rpc, bot_accid)
 
-    print("dbg end 2")
-
 
 def test_invalid_stats_id_sends_error_message(
     chat_id_with_bot, user_rpc, bot_rpc, bot_accid, user_accid, reports_dir, tmp_path
 ):
-    print("dbg start 4")
     stats = {"stats_id": "bad id"}  # spaces are invalid
     send_statistics(user_rpc, user_accid, chat_id_with_bot, stats, tmp_path)
 
     def got_error_reply():
         msg_ids = user_rpc.get_message_ids(user_accid, chat_id_with_bot, False, False)
         messages = user_rpc.get_messages(user_accid, msg_ids)
-        print("dbg")
-        for m in messages.values():
-            print(getattr(m, "text", ""))
-        return True
         return any(
             "couldn't understand" in (getattr(m, "text", "") or "")
             for m in messages.values()
@@ -99,5 +85,3 @@ def test_invalid_stats_id_sends_error_message(
     assert not (reports_dir / "bad id").exists()
 
     assert_bot_cleaned_up(bot_rpc, bot_accid)
-
-    print("dbg end 4")

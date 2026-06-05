@@ -24,7 +24,6 @@ def on_new_message(bot, accid, event):
     chatid = event.msg.chat_id
     msg = event.msg
     try:
-        print("dbg receiving message", msg.id, "in", msg.chat_id)
         if msg.text.startswith("core_version "):
             bot.rpc.misc_send_text_message(
                 accid,
@@ -67,10 +66,8 @@ def on_new_message(bot, accid, event):
             msg.id,
             ["❤️"],
         )
-        print("dbg sent reaction for message", msg.id)
 
     except Exception as e:
-        print("dbg exception", e)
         bot.logger.exception("Could not parse self_reporting message")
         bot.rpc.misc_send_text_message(
             accid,
@@ -86,7 +83,6 @@ def cleanup_after_message(bot, accid, chat_id):
 
     # First delete the chat,
     # because contacts that are still in a chat can't be deleted
-    print("dbg deleting chat", chat_id)
     bot.rpc.delete_chat(accid, chat_id)
     bot.logger.info(f"Cleaned up chat {chat_id}.")
 
@@ -104,16 +100,12 @@ def cleanup_after_message(bot, accid, chat_id):
 def log_event(bot, accid, event):
     if event.kind == EventType.INFO:
         bot.logger.info(event.msg)
-        print(accid, "INFO:", event.msg)
     elif event.kind == EventType.WARNING:
         bot.logger.warning(event.msg)
-        print(accid, "WARN:", event.msg)
     elif event.kind == EventType.ERROR:
         bot.logger.error(event.msg)
-        print(accid, "ERROR:", event.msg)
     else:
         bot.logger.info(f"Event: {event}")
-        print(accid, "Got event:", event)
 
 
 @cli.on_init

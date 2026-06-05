@@ -1,4 +1,3 @@
-# tests/conftest.py
 import json
 import logging
 import threading
