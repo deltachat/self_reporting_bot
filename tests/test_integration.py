@@ -65,23 +65,20 @@ class TestBotIntegration:
         assert "timestamp_received_by_bot" in saved[0]
 
     def test_cleanup_happens_after_reaction_is_delivered(
-        self, established_chat, bot_rpc, bot_accid, user_rpc, user_accid, reports_dir, tmp_path
+        self, bot_rpc, bot_accid, user_rpc, user_accid, established_chat, reports_dir, tmp_path
     ):
         stats = {"stats_id": "cleanupOrder001", "x": 1}
-        chat_id = established_chat
         send_statistics(user_rpc, user_accid, established_chat, stats, tmp_path)
-        assert chat_id is not None
 
         def got_reaction():
-            msg_ids = user_rpc.get_message_ids(user_accid, chat_id, False, False)
+            msg_ids = user_rpc.get_message_ids(user_accid, established_chat, False, False)
             return any(user_rpc.get_message_reactions(user_accid, m) for m in msg_ids)
 
         wait_for(got_reaction, msg="Reaction never delivered to user — cleanup may have fired too early")
 
         def bot_chat_gone():
-            chats = bot_rpc.get_chat_list_ids(bot_accid)
-            # After cleanup the chat should not appear in the bot's chat list
-            return True  # placeholder — see note below 
+            chat_ids = bot_rpc.get_chatlist_entries(bot_accid, None, None, None)
+            return established_chat not in chat_ids
 
         wait_for(bot_chat_gone, msg="Bot never cleaned up the chat")
 
