@@ -49,6 +49,7 @@ def user_rpc(tmp_path_factory):
 def bot_accid(bot_rpc):
     accid = bot_rpc.add_account()
     bot_rpc.set_config(accid, "displayname", "TestBot")
+    bot_rpc.set_config(accid, "bot", "1")
     bot_rpc.add_transport_from_qr(accid, CHATMAIL_QR)
     return accid
 

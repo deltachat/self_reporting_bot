@@ -67,8 +67,10 @@ def on_new_message(bot, accid, event):
             msg.id,
             ["❤️"],
         )
+        print("dbg sent reaction for message", msg.id)
 
-    except Exception:
+    except Exception as e:
+        print("dbg exception", e)
         bot.logger.exception("Could not parse self_reporting message")
         bot.rpc.misc_send_text_message(
             accid,
