@@ -9,6 +9,8 @@ from deltachat2 import EventType, events
 from deltachat2.types import SpecialContactId
 from rich.logging import RichHandler
 
+REPORTS_DIR = Path("reports")
+
 cli = BotCli("self_reporting_bot")
 logging.basicConfig(
     level=logging.INFO,
@@ -42,8 +44,8 @@ def on_new_message(bot, accid, event):
         if len(stats_id) < 11 or len(stats_id) > 32:
             raise ValueError("stats_id has the wrong length")
 
-        Path("reports").mkdir(exist_ok=True)
-        filename = os.path.join("reports", stats_id)
+        REPORTS_DIR.mkdir(exist_ok=True)
+        filename = REPORTS_DIR / stats_id
 
         new_data["timestamp_received_by_bot"] = int(time.time())
 
@@ -65,7 +67,6 @@ def on_new_message(bot, accid, event):
             ["❤️"],
         )
 
-        cleanup_after_message(bot, accid, msg.chat_id)
     except Exception:
         bot.logger.exception("Could not parse self_reporting message")
         bot.rpc.misc_send_text_message(
@@ -73,6 +74,7 @@ def on_new_message(bot, accid, event):
             chatid,
             "Sorry, I couldn't understand your message.\n\nI am a bot for receiving statistics about your usage of Delta Chat. All other messages will be ignored.",
         )
+    finally:
         cleanup_after_message(bot, accid, msg.chat_id)
 
 
